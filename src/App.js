@@ -1,9 +1,10 @@
 import './App.css';
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import Input from './Input';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import "../node_modules/font-awesome/css/font-awesome.min.css";
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import axios from 'axios';
 import Swal from "sweetalert2";
@@ -14,46 +15,47 @@ function App() {
     handleSubmit,
     reset
   } = useForm();
-  
-  const [quesPprArr,setQuesPprArr]  = useState([]);
-  const [quesArr,setQuesArr]  = useState([]);
+
+  const [quesPprArr, setQuesPprArr] = useState([]);
+  const [quesArr, setQuesArr] = useState([]);
   const [pprId, setPprId] = useState();
   const [queId, setQueId] = useState();
   const [pmode, setPmode] = useState(true);
   const [pushDb, setPushDb] = useState(false);
-  const [accOpen , setAccOpen]  = useState(-1);
+  const [accOpen, setAccOpen] = useState(-1);
 
   const URL = "https://cryptic-crag-63552.herokuapp.com/python/dashboard";
 
   useEffect(() => {
     var config = {
       method: 'get',
-      url: URL+"/allSets"
+      url: URL + "/allSets"
     };
-    
+
     axios(config)
       .then(function (response) {
         setQuesPprArr(response.data);
       });
-    
+
   }, [pprId]);
 
-  const paperLoad = (e)=>{
-    if(e === -1) return;
+  const paperLoad = (e) => {
+    console.log(e);
+    if (e === -1) return;
     var config = {
       method: 'get',
-      url: URL+"/question?setId="+e
+      url: URL + "/question?setId=" + e
     };
-    
+
     axios(config)
-    .then(function (response) {
-      setQuesArr(response.data);
-      setPprId(e);
-    })
+      .then(function (response) {
+        setQuesArr(response.data);
+        setPprId(e);
+      })
   }
-   
+
   const newSet = () => {
-    
+
     Swal.fire({
       title: 'Add a Set',
       html: `<label for="name">Set Name</label> 
@@ -100,7 +102,7 @@ function App() {
         });
       });
     })
-    
+
   }
 
   const showAllQuestions = () => {
@@ -133,9 +135,9 @@ function App() {
 
     var config = {
       method: 'get',
-      url: URL+"/allSets"
+      url: URL + "/allSets"
     };
-    
+
     axios(config)
       .then(function (response) {
         setQuesPprArr(response.data);
@@ -156,25 +158,50 @@ function App() {
       setQueId(-1);
     });
   }
+  const deleteItem = (id) => {
+    console.log(id);
+    const output = quesPprArr.filter((e) => {
+      return id !== e._id;
+    })
+    console.log(output);
+    setQuesPprArr(output);
+  }
 
+  const deleteQues = (id) => {
+    console.log(id);
+    const output =  quesArr.filter((e) => {
+      return id !== e._id;
+    })
+    console.log(output);
+    setQuesArr(output);
+  }
+
+  const showQuestions = () => {
+    var x = document.getElementById("questionSet");
+    if (x.style.display === "none") {
+      x.style.display = "block"
+    } else {
+      x.style.display = "none"
+    }
+  }
   return (
     <div className="App">
-    
+
       <div className='App-header'>
         <h1> Dashboard </h1>
       </div>
-      
+
       <div className='navOptions'>
         <button className='btn btn-primary' onClick={showAllQuestions}>View All Questions</button>
         <button className='btn btn-primary' onClick={newSet}>Add new set</button>
         <button className='btn btn-primary' onClick={() => { setPmode(false); setPushDb(false); }}>Add a question</button>
         <button className='btn btn-primary' onClick={showAllSets}>Push Question To a Set</button>
       </div>
-      
+
       {
         pmode === true ?
           <div>
-            <div className='selectList'>
+            {/* <div className='selectList'>
               <label className='listLabel' for="selectList">Choose a Set</label>
               <select
                 value={pprId}
@@ -190,6 +217,24 @@ function App() {
                   </>
                 ))}
               </select>
+            </div> */}
+            <div className='container'>
+              <div className='mb-3' onClick={showQuestions} style={{cursor:"pointer"}}><b>Choose a Set&nbsp;<span className='fa fa-angle-down' style={{fontWeight:"bolder"}}></span></b></div>
+              <div id="questionSet">
+                {quesPprArr.map((m, _i) => (
+                  <div className='' key={m._id}>
+                    <div className='row'>
+                      <div className='col-lg-9 col-md-6 col-12 justify-content-start d-flex'>
+                        <div value={m._id}>{m.title} - {m.type} set &nbsp;</div>
+                      </div>
+                      <div className='col-lg-3 col-md-6 col-12 my-lg-0 my-md-0 my-3 justify-content-lg-end justify-content-md-end justify-content-center d-flex'>
+                        <div className='fa fa-pull-right btn btn-primary p-2 align-items-center d-flex mx-3 mb-2' style={{ height: "25px", padding: "0", width: "fit-content" }} onClick={() => paperLoad(m._id)}>Open</div>
+                        <div className='fa fa-trash btn btn-primary p-2 align-items-center d-flex' style={{ height: "25px", padding: "0", width: "fit-content" }} onClick={() => deleteItem(m._id)}>&nbsp;Delete Set</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="accordion accordion-flush questionList" id="accordionFlushExample">
@@ -207,37 +252,41 @@ function App() {
                         >
                           <strong>{m.title}</strong>
                         </button>
+                        
                       </h2>
-                      
+                     
+
                       <div id={"flush-collapseOne"} className={"question accordion-collapse collapse" + (m._id === accOpen ? "show" : "")} >
                         <div className="accordion-body float-left">
                           <p className='text-left prew'>
                             <u>
-                              Description: 
+                              Description:
                             </u><br />
                             {m.description}<br />
                             <u>
-                              Input: 
+                              Input:
                             </u><br />
                             {m.input}<br />
                             <u>
-                              Output: 
+                              Output:
                             </u><br />
                             {m.output}<br />
                             <u>
-                              Solution: 
+                              Solution:
                             </u><br />
                             {m.sol}<br />
                           </p>
                         </div>
                       </div>
+                      <div className='fa fa-trash btn btn-primary p-2 align-items-center d-flex' style={{ height: "25px", padding: "0", width: "fit-content" }} onClick={() => deleteQues(m._id)}>&nbsp;Delete Question</div>
+                     
                     </div>
                   </>
                 )
               }
             </div>
           </div>
-           :
+          :
           pushDb === true ?
             <div className='pushDB'>
               <div className='list'>
@@ -257,7 +306,7 @@ function App() {
                   ))}
                 </select>
               </div>
-              
+
               <div className='list'>
                 <label className='inputLabel' for="QueList">Choose a Question</label>
                 <select
@@ -277,7 +326,7 @@ function App() {
               </div>
 
               <button className='questionBtn' onClick={pushq}>
-                  Add to Set
+                Add to Set
               </button>
             </div> :
             <form
@@ -292,7 +341,7 @@ function App() {
               <Input lbl="input" reg={register}></Input>
               <Input lbl="output" reg={register}></Input>
               <Input lbl="sol" reg={register}></Input>
-              
+
               <div className='navOptions'>
                 <button
                   className='questionBtn'
@@ -304,13 +353,13 @@ function App() {
                   className='questionBtn'
                   onClick={() => reset()}
                 >
-                Clear Form
+                  Clear Form
                 </button>
                 <button className='btn btn-danger questionBtn' onClick={() => setPmode(true)}>
                   Cancel
                 </button>
               </div>
-              
+
             </form>
       }
     </div>
