@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import Input from './Input';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "../node_modules/font-awesome/css/font-awesome.min.css";
+import "font-awesome/css/font-awesome.min.css";
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import axios from 'axios';
 import Swal from "sweetalert2";
